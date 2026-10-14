@@ -109,7 +109,7 @@ export default function TalentForm({
 
       {failed && (
         <p role="alert" className="rounded-lg bg-red-50 p-3 text-base text-red-800">
-          Sorry, something went wrong submitting your form. Please try again, or ask Bay Venues staff.
+          The form hasn't been saved yet. If the share sheet was closed, tap submit again. Otherwise please ask Bay Venues staff.
         </p>
       )}
       {answered && <button
