@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react'
-import Logo from './components/Logo'
 import ShootDetails from './components/ShootDetails'
 import TalentForm, { type TalentSubmission } from './components/TalentForm'
 import { deliverPdf } from './lib/deliverPdf'
 import { loadAssets } from './lib/loadAssets'
 import { todayISO, type Values } from './lib/validate'
 
-type Screen = 'shoot' | 'talent' | 'thanks'
+type Screen = 'shoot' | 'talent'
 
 // Shoot details are kept in React state only (never localStorage), so they
 // survive between talent but vanish on reload.
 export default function App() {
   const [screen, setScreen] = useState<Screen>('shoot')
   const [shoot, setShoot] = useState<Values>({ date: todayISO() })
+  // Bumping this remounts TalentForm, which throws away everything the last
+  // talent entered and gives the next talent a blank form.
+  const [formKey, setFormKey] = useState(0)
+  const [saved, setSaved] = useState(false)
 
   // Warm up the PDF code and static assets (blank form, font) while staff type,
   // so submit still works if the venue's connection drops later. No personal data.
@@ -26,7 +29,14 @@ export default function App() {
   useEffect(() => {
     window.scrollTo(0, 0)
     document.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true })
-  }, [screen])
+  }, [screen, formKey])
+
+  // Brief confirmation for staff after a form is saved. Shows no personal details.
+  useEffect(() => {
+    if (!saved) return
+    const t = setTimeout(() => setSaved(false), 6000)
+    return () => clearTimeout(t)
+  }, [saved])
 
   // Builds the signed PDF in the browser and hands it to deliverPdf. Nothing
   // from the talent is kept: once this resolves, TalentForm is unmounted.
@@ -39,35 +49,30 @@ export default function App() {
       await loadAssets(),
     )
     await deliverPdf(bytes, pdfFileName(shoot.date, values.fullName, shoot.reason))
-    setScreen('thanks')
+    // Straight back to a blank form for the next talent, same shoot details.
+    setFormKey((k) => k + 1)
+    setSaved(true)
   }
+
   return (
     <main className="min-h-dvh bg-white text-slate-900">
+      {saved && screen === 'talent' && (
+        <div role="status" className="bg-bv-green px-4 py-3 text-center text-base font-bold text-white">
+          Form saved. Ready for the next person.
+        </div>
+      )}
       {screen === 'shoot' && (
         <ShootDetails
           initial={shoot}
-          onDone={(v) => { setShoot(v); setScreen('talent') }}
+          onDone={(v) => { setShoot(v); setSaved(false); setScreen('talent') }}
         />
       )}
-      {screen === 'talent' && <TalentForm onSubmit={handleSubmit} />}
-      {screen === 'thanks' && (
-        <div className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-4 p-6 text-center">
-          <Logo />
-          <h1 tabIndex={-1} className="text-3xl font-black text-bv-blue outline-none">Thank you!</h1>
-          <p className="text-lg text-slate-700">Your form has been completed. Please hand the device back to Bay Venues staff.</p>
-          <button
-            onClick={() => setScreen('talent')}
-            className="mt-4 h-16 rounded-xl bg-bv-blue text-lg font-bold text-white active:bg-bv-navy"
-          >
-            Next person
-          </button>
-          <button
-            onClick={() => setScreen('shoot')}
-            className="h-12 text-base text-slate-600 underline"
-          >
-            Change shoot details
-          </button>
-        </div>
+      {screen === 'talent' && (
+        <TalentForm
+          key={formKey}
+          onSubmit={handleSubmit}
+          onChangeShoot={() => setScreen('shoot')}
+        />
       )}
     </main>
   )

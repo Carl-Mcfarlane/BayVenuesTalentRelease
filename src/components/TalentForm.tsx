@@ -27,9 +27,10 @@ export type TalentSubmission = { values: Values; signaturePng: string }
  * (after submit) everything is discarded.
  */
 export default function TalentForm({
-  onSubmit,
+  onSubmit, onChangeShoot,
 }: {
   onSubmit: (s: TalentSubmission) => Promise<void>
+  onChangeShoot: () => void
 }) {
   const [values, setValues] = useState<Values>({})
   const [errors, setErrors] = useState<Errors>({})
@@ -119,6 +120,18 @@ export default function TalentForm({
       >
         {busy ? 'Preparing your form…' : 'I agree and submit'}
       </button>}
+      <div className="pt-4 text-center">
+        <button
+          type="button"
+          onClick={() => {
+            const started = Object.values(values).some(Boolean) || (pad.current ? !pad.current.isEmpty() : false)
+            if (!started || window.confirm('Discard this form and change the shoot details?')) onChangeShoot()
+          }}
+          className="h-12 px-4 text-base text-slate-600 underline"
+        >
+          Staff: change shoot details
+        </button>
+      </div>
     </form>
   )
 }
