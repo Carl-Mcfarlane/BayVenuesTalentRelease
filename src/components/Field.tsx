@@ -19,10 +19,16 @@ export default function Field({
   const id = `f-${field.key}`
   const isText = field.type !== 'date'
   const isDate = field.type === 'date'
-  const [y, m, d] = value.split('-').map(Number)
-  const shown = value
-    ? new Intl.DateTimeFormat('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(y, m - 1, d))
-    : 'Choose a date'
+  // Only date fields are formatted. (Formatting every field's text as a date
+  // threw an error on the first keystroke.)
+  let shown = 'Choose a date'
+  if (isDate && value) {
+    const [y, m, d] = value.split('-').map(Number)
+    const date = new Date(y, m - 1, d)
+    if (!Number.isNaN(date.getTime())) {
+      shown = new Intl.DateTimeFormat('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' }).format(date)
+    }
+  }
   return (
     <div data-field={field.key}>
       <label htmlFor={id} className="mb-1 block text-base font-semibold text-bv-blue">
