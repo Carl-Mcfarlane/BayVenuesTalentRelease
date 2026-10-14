@@ -34,4 +34,17 @@
 @layer base {
   body { font-weight: 500; }
   h1 { font-weight: 900; }
+
+  /* iOS Safari sizes and centres date inputs differently from text inputs. */
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    text-align: left;
+  }
+  input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+  input[type="date"]::-webkit-datetime-edit { padding: 0; }
 }
