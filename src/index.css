@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* Bay Venues brand palette (from the brand guidelines). */
+@theme {
+  --color-bv-blue: #0b4c88;   /* Dark Blue: primary. Solid fills, white text on blue */
+  --color-bv-navy: #083a69;   /* pressed state of Dark Blue */
+  --color-bv-light: #5d8cb3;  /* Light Blue */
+  --color-bv-yellow: #fdd803;
+  --color-bv-red: #e73d30;
+  --color-bv-green: #097953;
+  --color-bv-purple: #773192;
+}
+
+/*
+ * Brand typeface: Museo Sans (900 / 700 / 500 / 300). It is a licensed font, so
+ * the files are NOT in this repo. Put licensed web-font files at
+ * public/fonts/MuseoSans-300.woff2, -500, -700 and -900 (see public/fonts/README.md).
+ * Until then the stack falls back to Calibri (the brand's approved fallback),
+ * then the device's system font.
+ */
+@font-face { font-family: "Museo Sans"; font-weight: 300; font-display: swap;
+  src: local("Museo Sans 300"), local("MuseoSans-300"), url("/fonts/MuseoSans-300.woff2") format("woff2"); }
+@font-face { font-family: "Museo Sans"; font-weight: 500; font-display: swap;
+  src: local("Museo Sans 500"), local("MuseoSans-500"), url("/fonts/MuseoSans-500.woff2") format("woff2"); }
+@font-face { font-family: "Museo Sans"; font-weight: 700; font-display: swap;
+  src: local("Museo Sans 700"), local("MuseoSans-700"), url("/fonts/MuseoSans-700.woff2") format("woff2"); }
+@font-face { font-family: "Museo Sans"; font-weight: 900; font-display: swap;
+  src: local("Museo Sans 900"), local("MuseoSans-900"), url("/fonts/MuseoSans-900.woff2") format("woff2"); }
+
+@theme {
+  --font-sans: "Museo Sans", Calibri, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  body { font-weight: 500; }
+  h1 { font-weight: 900; }
+}
