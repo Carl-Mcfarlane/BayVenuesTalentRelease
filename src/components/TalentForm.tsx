@@ -7,6 +7,7 @@ import { focusField } from '../lib/focusField'
 import { trimmedSignaturePng } from '../lib/trimSignature'
 import { isVisible, labelFor, validate, type Errors, type Values } from '../lib/validate'
 import Field from './Field'
+import HoldButton from './HoldButton'
 import Logo from './Logo'
 import SignaturePad from './SignaturePad'
 import YesNo from './YesNo'
@@ -27,10 +28,10 @@ export type TalentSubmission = { values: Values; signaturePng: string }
  * (after submit) everything is discarded.
  */
 export default function TalentForm({
-  onSubmit, onChangeShoot,
+  onSubmit, onStaff,
 }: {
   onSubmit: (s: TalentSubmission) => Promise<void>
-  onChangeShoot: () => void
+  onStaff: () => void
 }) {
   const [values, setValues] = useState<Values>({})
   const [errors, setErrors] = useState<Errors>({})
@@ -110,7 +111,7 @@ export default function TalentForm({
 
       {failed && (
         <p role="alert" className="rounded-lg bg-red-50 p-3 text-base text-red-800">
-          The form hasn't been saved yet. If the share sheet was closed, tap submit again. Otherwise please ask Bay Venues staff.
+          Sorry, your form couldn't be saved on this device. Please try again, or ask Bay Venues staff.
         </p>
       )}
       {answered && <button
@@ -118,19 +119,10 @@ export default function TalentForm({
         disabled={busy}
         className="h-16 w-full rounded-xl bg-bv-blue text-lg font-bold text-white active:bg-bv-navy disabled:opacity-60"
       >
-        {busy ? 'Preparing your form…' : 'I agree and submit'}
+        {busy ? 'Saving…' : 'I agree and submit'}
       </button>}
       <div className="pt-4 text-center">
-        <button
-          type="button"
-          onClick={() => {
-            const started = Object.values(values).some(Boolean) || (pad.current ? !pad.current.isEmpty() : false)
-            if (!started || window.confirm('Discard this form and change the shoot details?')) onChangeShoot()
-          }}
-          className="h-12 px-4 text-base text-slate-600 underline"
-        >
-          Staff: change shoot details
-        </button>
+        <HoldButton onHold={onStaff}>Staff: hold to open</HoldButton>
       </div>
     </form>
   )

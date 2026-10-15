@@ -1,14 +1,8 @@
-import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib'
+import { PDFDocument, rgb, type PDFEmbeddedPage, type PDFFont, type PDFPage } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import { ageParagraphMinor, ageParagraphPdf, fields } from '../formSchema'
+import type { Entry } from './batchStore'
 import type { Values } from './validate'
-
-export type PdfInput = {
-  shoot: Values // photographer, reason, date (YYYY-MM-DD), venue
-  talent: Values // fullName, email, phone, under18, guardianName
-  signaturePng: Uint8Array
-  signedAt: Date
-}
 
 export type PdfAssets = {
   templateBytes: Uint8Array // the original flat PDF
@@ -53,12 +47,10 @@ const parseISO = (s: string) => {
   return new Date(y, m - 1, d)
 }
 
-export async function generatePdf(input: PdfInput, assets: PdfAssets): Promise<Uint8Array> {
-  const { shoot, talent, signaturePng, signedAt } = input
-  const doc = await PDFDocument.load(assets.templateBytes)
-  doc.registerFontkit(fontkit)
-  const font = await doc.embedFont(assets.fontBytes, { subset: false })
-  const page = doc.getPage(0)
+/** Draws one person's answers onto a page that already carries the blank form. */
+async function drawEntry(doc: PDFDocument, page: PDFPage, font: PDFFont, shoot: Values, entry: Entry) {
+  const talent = entry.values
+  const signedAt = new Date(entry.submittedAt)
   const under18 = talent.under18 === 'yes'
 
   onLine(page, font, talent.fullName.trim(), 'fullName')
@@ -102,7 +94,7 @@ export async function generatePdf(input: PdfInput, assets: PdfAssets): Promise<U
 
   // Signature, scaled to fit above its line.
   const sig = pos('signature')
-  const img = await doc.embedPng(signaturePng)
+  const img = await doc.embedPng(entry.signaturePng)
   const maxW = sig.xEnd - sig.x - 6
   const maxH = 26
   const scale = Math.min(maxW / img.width, maxH / img.height)
@@ -115,16 +107,46 @@ export async function generatePdf(input: PdfInput, assets: PdfAssets): Promise<U
   const dateText = fmtDate(signedAt)
   page.drawText(dateText, { x: sd.x + 2, y: sd.y + 3, size: 10, font, color: INK })
   page.drawText(fmtTime(signedAt), { x: sd.x + 2, y: sd.y - 9, size: 8, font, color: INK })
+}
 
-  doc.setTitle('Talent Release Form')
+/**
+ * One PDF containing a copy of the original form per signer, in signing order.
+ * The blank form and the font are embedded once, then reused for every page, so
+ * the file stays small and memory stays low even for dozens of signers.
+ */
+export async function generateCombinedPdf(
+  shoot: Values,
+  entries: Entry[],
+  assets: PdfAssets,
+  onProgress?: (done: number, total: number) => void,
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.create()
+  doc.registerFontkit(fontkit)
+  const font = await doc.embedFont(assets.fontBytes, { subset: false })
+  const [form]: PDFEmbeddedPage[] = await doc.embedPdf(assets.templateBytes, [0])
+
+  for (let i = 0; i < entries.length; i++) {
+    const page = doc.addPage([form.width, form.height])
+    page.drawPage(form)
+    try {
+      await drawEntry(doc, page, font, shoot, entries[i])
+    } catch {
+      // No details in the message: it is shown to staff and must not leak personal data.
+      throw new Error(`Could not build form ${i + 1} of ${entries.length}`)
+    }
+    onProgress?.(i + 1, entries.length)
+    await new Promise((r) => setTimeout(r)) // let the screen update on slower phones
+  }
+
+  doc.setTitle('Talent Release Forms')
   doc.setProducer('Bay Venues Talent Release Forms')
   doc.setCreator('Bay Venues Talent Release Forms')
   return doc.save()
 }
 
-/** "YYYY-MM-DD - Full Name - Shoot reason.pdf", safe for Windows/SharePoint. */
-export function pdfFileName(shootDateISO: string, fullName: string, reason: string): string {
-  const clean = (s: string) =>
-    s.replace(/[\\/:*?"<>|#%~&{}\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60).trim()
-  return `${shootDateISO} - ${clean(fullName) || 'Unnamed'} - ${clean(reason) || 'Shoot'}.pdf`
+/** "YYYY-MM-DD - Shoot reason - N forms.pdf", safe for Windows/SharePoint. */
+export function batchFileName(shootDateISO: string, reason: string, count: number): string {
+  const clean = (t: string) =>
+    t.replace(/[\\/:*?"<>|#%~&{}\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60).trim()
+  return `${shootDateISO} - ${clean(reason) || 'Shoot'} - ${count} ${count === 1 ? 'form' : 'forms'}.pdf`
 }

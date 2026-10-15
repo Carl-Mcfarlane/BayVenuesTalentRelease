@@ -6,10 +6,11 @@ import Field from './Field'
 import Logo from './Logo'
 
 export default function ShootDetails({
-  initial, onDone,
+  initial, onDone, error,
 }: {
   initial: Values
-  onDone: (v: Values) => void
+  onDone: (v: Values) => void | Promise<void>
+  error?: string
 }) {
   const [values, setValues] = useState<Values>(initial)
   const [errors, setErrors] = useState<Errors>({})
@@ -43,6 +44,9 @@ export default function ShootDetails({
           onChange={(v) => setValues((s) => ({ ...s, [f.key]: v }))}
         />
       ))}
+      {error && (
+        <p role="alert" className="rounded-lg bg-red-50 p-3 text-base text-red-800">{error}</p>
+      )}
       <button
         type="submit"
         className="h-16 w-full rounded-xl bg-bv-blue text-lg font-bold text-white active:bg-bv-navy"
