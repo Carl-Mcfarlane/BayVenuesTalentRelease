@@ -13,19 +13,19 @@
 
 /*
  * Brand typeface: Museo Sans (900 / 700 / 500 / 300). It is a licensed font, so
- * the files are NOT in this repo. Put licensed web-font files at
- * public/fonts/MuseoSans-300.woff2, -500, -700 and -900 (see public/fonts/README.md).
+ * the files are NOT in this repo. Put licensed font files at
+ * public/fonts/MuseoSans-300.otf, -500, -700 and -900 (see public/fonts/README.md).
  * Until then the stack falls back to Calibri (the brand's approved fallback),
  * then the device's system font.
  */
 @font-face { font-family: "Museo Sans"; font-weight: 300; font-display: swap;
-  src: local("Museo Sans 300"), local("MuseoSans-300"), url("/fonts/MuseoSans-300.woff2") format("woff2"); }
+  src: local("Museo Sans 300"), local("MuseoSans-300"), url("/fonts/MuseoSans-300.otf") format("opentype"); }
 @font-face { font-family: "Museo Sans"; font-weight: 500; font-display: swap;
-  src: local("Museo Sans 500"), local("MuseoSans-500"), url("/fonts/MuseoSans-500.woff2") format("woff2"); }
+  src: local("Museo Sans 500"), local("MuseoSans-500"), url("/fonts/MuseoSans-500.otf") format("opentype"); }
 @font-face { font-family: "Museo Sans"; font-weight: 700; font-display: swap;
-  src: local("Museo Sans 700"), local("MuseoSans-700"), url("/fonts/MuseoSans-700.woff2") format("woff2"); }
+  src: local("Museo Sans 700"), local("MuseoSans-700"), url("/fonts/MuseoSans-700.otf") format("opentype"); }
 @font-face { font-family: "Museo Sans"; font-weight: 900; font-display: swap;
-  src: local("Museo Sans 900"), local("MuseoSans-900"), url("/fonts/MuseoSans-900.woff2") format("woff2"); }
+  src: local("Museo Sans 900"), local("MuseoSans-900"), url("/fonts/MuseoSans-900.otf") format("opentype"); }
 
 @theme {
   --font-sans: "Museo Sans", Calibri, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
