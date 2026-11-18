@@ -25,4 +25,36 @@ npm run dev      # local dev server
 npm run build    # type-check and build
 ```
 
-Brand fonts: see `public/fonts/README.md`.
+Brand fonts: Museo Sans, see `public/fonts/README.md` (licence note included).
+
+## Security
+
+`vercel.json` sets security headers on every response: a strict Content-Security-Policy (own files only, no outside connections, no embedding), `X-Frame-Options`, `X-Content-Type-Options`, `Strict-Transport-Security`, `Permissions-Policy`, `Referrer-Policy: no-referrer` and `Cache-Control: no-store`.
+
+If you add anything that loads from or talks to another domain (analytics, a CDN font, an API), the browser will block it until the Content-Security-Policy is updated. Treat that as a prompt to review the privacy impact first. Dependencies can be checked with `npm audit --omit=dev`.
+
+## Personal information held
+
+| Data | Why | Where | Deleted |
+|---|---|---|---|
+| Name, email, phone | Identify the signer | Staff device only (IndexedDB), then the PDF | After the PDF is saved and confirmed, on discard, or after 24 hours with no new signature |
+| Under-18 status, guardian name | Consent for minors | As above | As above |
+| Signature | Proof of consent | As above | As above |
+| Shoot details | Context for the form | In memory, then the PDF | When the app is closed or reloaded |
+
+The app does not encrypt data stored on the device, so devices should have a passcode.
+
+## Using it at a shoot
+
+1. Enter the shoot details and tap **Hand to talent**.
+2. Each person fills in their details and signs. The app returns to a blank form for the next person.
+3. When everyone has signed, hold **Staff: hold to open**, then **Finish shoot and save PDF**.
+4. Save the PDF somewhere approved, then confirm it saved. Only then is the data deleted.
+
+## Deployment and devices
+
+Deployed on Vercel as a static site from `main` (no serverless functions or backend). Targets iPhone Safari and iPad. Staff can use Share > Add to Home Screen; the app does not work offline.
+
+## Planned
+
+SharePoint delivery (replacing the share sheet inside `deliverPdf`). It will need authentication or email sending, so it should get its own security review.
