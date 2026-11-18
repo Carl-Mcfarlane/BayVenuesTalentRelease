@@ -15,7 +15,7 @@ Static React + Vite + TypeScript site (Tailwind, pdf-lib, react-signature-canvas
 
 ## Delivery
 
-All delivery goes through `deliverPdf(pdfBytes, fileName)` in `src/lib/deliverPdf.ts`: the device share sheet, falling back to a download. SharePoint delivery is planned but not built; when it is, only the inside of that function should change.
+All delivery goes through `deliverPdf(pdfBytes, fileName)` in `src/lib/deliverPdf.ts`: the device share sheet, falling back to a download.
 
 ## Develop
 
@@ -54,7 +54,3 @@ The app does not encrypt data stored on the device, so devices should have a pas
 ## Deployment and devices
 
 Deployed on Vercel as a static site from `main` (no serverless functions or backend). Targets iPhone Safari and iPad. Staff can use Share > Add to Home Screen; the app does not work offline.
-
-## Planned
-
-SharePoint delivery (replacing the share sheet inside `deliverPdf`). It will need authentication or email sending, so it should get its own security review.
